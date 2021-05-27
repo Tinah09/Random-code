@@ -1,0 +1,39 @@
+library(tidyverse)
+library(Seurat)
+library(ComplexHeatmap)
+
+pbmc<-readRDS("small_pbmc")
+
+mat<- pbmc[["RNA"]]@data[all_markers, ] %>% as.matrix()
+
+## scale the rows
+mat<- t(scale(t(mat)))
+
+cluster_anno<- pbmc@meta.data$seurat_clusters
+
+# get the value range in the matrix
+quantile(mat, c(0.1, 0.95))
+
+Seurat::PurpleAndYellow()
+
+col_fun = circlize::colorRamp2(c(-1, 0, 3), c("#FF00FF", "black", "#FFFF00"))
+
+Heatmap(mat, name = "Expression",  
+        column_split = factor(cluster_anno),
+        cluster_columns = TRUE,
+        show_column_dend = FALSE,
+        cluster_column_slices = TRUE,
+        column_title_gp = gpar(fontsize = 8),
+        column_gap = unit(0.5, "mm"),
+        cluster_rows = TRUE,
+        show_row_dend = FALSE,
+        col = col_fun,
+        row_names_gp = gpar(fontsize = 4),
+        column_title_rot = 90,
+        top_annotation = HeatmapAnnotation(foo = anno_block(gp = gpar(fill = scales::hue_pal()(9)))),
+        show_column_names = FALSE,
+        use_raster = TRUE,
+        raster_quality = 4)
+        
+        
+        
